@@ -1,5 +1,6 @@
 #!/bin/bash
 # cryptoAnalyzer v1.0, Author @4xeL
+
 # Colours
 endColour="\033[0m\e[0m"
 redColour="\e[0;31m\033[1m"
@@ -9,6 +10,7 @@ blueColour="\e[0;34m\033[1m"
 purpleColour="\e[0;35m\033[1m"
 turquoiseColour="\e[0;36m\033[1m"
 grayColour="\e[0;37m\033[1m"
+
 # variables globales
 unconfirmed_transactions="https://www.blockchain.com/es/btc/unconfirmed-transactions"
 url_transaction_inspection="https://www.blockchain.com/es/btc/tx/"
@@ -132,6 +134,7 @@ function trimString(){
 
 
 function dependencies(){
+
 	tput civis; counter=0
 	dependencies_array=(html2text bc)
 
@@ -160,19 +163,12 @@ function unconfirmedTransaction(){
   echo "${hash}_$(cat ut.tmp | grep "$hash" -A 2 | tail -n 1)_$(cat ut.tmp | grep "$hash" -A 4 | tail -n 1)_$(cat ut.tmp | grep "$hash" -A 6 | tail -n 1 | tr -d 'Â')" >> ut.table
   done
 
-  cat ut.table | tr '_' ' ' | awk '{print $5}' | grep -v 'Cantidad' | tr -d 'US$' | tr -d ',' | sed 's/\..*//g' > numeros.txt
+  cat ut.table | tr '_' ' ' | awk '{print $5}' | grep -v 'Cantidad' | tr -d 'US$' | tr -d ',' | sed 's/\..*//g' > money
 
-  cat numeros.txt
-
-
-
-
-  cat numeros.txt | while read num_in_line; do
+  cat money | while read num_in_line; do
     let num+=$num_in_line
     echo $num > money.tmp
     done;
-
-
 
   echo -n "Cantidad total_" > amount.table
   echo "\$$(printf "%\'.d\n" $(cat money.tmp))" >> amount.table
@@ -194,7 +190,7 @@ function unconfirmedTransaction(){
 }   
 
 function inspectTransaction(){
-	inspect_transaction_hash=$1
+  inspect_transaction_hash=$1
 
 	echo "Entrada Total_Salida Total" > total_entrada_salida.tmp
 
@@ -232,6 +228,7 @@ function inspectTransaction(){
 }
 
 function inspectAddress(){
+
 	address_hash=$1
 	echo "Transacciones realizadas_Cantidad total recibida (BTC)_Cantidad total enviada (BTC)_Saldo total en la cuenta (BTC)" > address.information
 	curl -s "${inspect_address_url}${address_hash}" | html2text | grep -E "Transacciones|Total recibido|Total enviado|Saldo final|--" -A 1 | head -n -2 | grep -v -E "Transacciones|Total recibido|Total enviado|Saldo final|--" | xargs | tr ' ' '_' | sed 's/_BTC/ BTC/g' >> address.information
@@ -269,6 +266,8 @@ function inspectAddress(){
 	rm address.information bitcoin_to_dollars 2>/dev/null
 	tput cnorm
 }
+
+# Main
 
 dependencies; parameter_counter=0 
 while getopts "e:n:i:a:h:" opt; do
